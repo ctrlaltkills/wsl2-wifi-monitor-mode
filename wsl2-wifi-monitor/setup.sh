@@ -64,8 +64,14 @@ open('include/config/auto.conf', 'w').write('\n'.join(auto_conf) + '\n')
 open('include/config/auto.conf.cmd', 'w').write('include/config/auto.conf: \\\n')
 PYEOF
 
-echo "[*] Building kernel prepare (generates all required build artifacts)..."
-make ARCH=x86_64 -j"$(nproc)" prepare
+echo "[*] Cleaning build state..."
+make ARCH=x86_64 clean
+
+echo "[*] Building kernel scripts and headers..."
+make ARCH=x86_64 -j"$(nproc)" scripts
+
+echo "[*] Generating timeconst.h..."
+make ARCH=x86_64 include/generated/timeconst.h
 
 echo "[*] Running modules_prepare..."
 make ARCH=x86_64 -j"$(nproc)" modules_prepare
