@@ -25,17 +25,12 @@ fi
 
 if [ ! -d "${KERNEL_SRC}" ]; then
     echo "[*] Cloning WSL2 kernel source..."
-    git clone --depth=1 --filter=blob:none --no-checkout \
-        --branch "${KERNEL_TAG}" \
+    git clone --depth=1 --branch "${KERNEL_TAG}" \
         https://github.com/microsoft/WSL2-Linux-Kernel.git \
         "${KERNEL_SRC}"
 fi
 
 cd "${KERNEL_SRC}"
-
-git sparse-checkout init
-git sparse-checkout set scripts include arch tools
-git checkout
 
 cp /proc/config.gz .
 gunzip -f config.gz
@@ -67,27 +62,6 @@ autoconf += ['', '#endif']
 open('include/generated/autoconf.h', 'w').write('\n'.join(autoconf) + '\n')
 open('include/config/auto.conf', 'w').write('\n'.join(auto_conf) + '\n')
 open('include/config/auto.conf.cmd', 'w').write('include/config/auto.conf: \\\n')
-PYEOF
-
-bash scripts/mkcompile_h x86_64 "gcc" ld > include/generated/compile.h 2>/dev/null || echo "" > include/generated/compile.h
-
-python3 - << 'PYEOF'
-content = open('Makefile').read()
-
-content = content.replace(
-    'include/generated/compile.h: FORCE',
-    'include/generated/compile.h:',
-    1
-)
-
-start = content.find('prepare: CC_VERSION_TEXT :=')
-end = content.find('\nPHONY += help', start)
-if start != -1 and end != -1:
-    new_block = 'prepare: CC_VERSION_TEXT := $(CC_VERSION_TEXT)\nprepare:\n\t@:'
-    content = content[:start] + new_block + '\n' + content[end:]
-
-open('Makefile', 'w').write(content)
-print('[*] Makefile patched')
 PYEOF
 
 echo "[*] Building kernel scripts..."
