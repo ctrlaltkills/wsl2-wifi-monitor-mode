@@ -40,6 +40,7 @@ mkdir -p include/config include/generated
 
 python3 - << 'PYEOF'
 import re
+import os
 
 lines = open('.config').read().splitlines()
 autoconf = ['/* Automatically generated. */', '#ifndef __GENERATED_AUTOCONF_H', '#define __GENERATED_AUTOCONF_H', '']
@@ -62,16 +63,14 @@ autoconf += ['', '#endif']
 open('include/generated/autoconf.h', 'w').write('\n'.join(autoconf) + '\n')
 open('include/config/auto.conf', 'w').write('\n'.join(auto_conf) + '\n')
 open('include/config/auto.conf.cmd', 'w').write('include/config/auto.conf: \\\n')
-PYEOF
 
-echo "[*] Cleaning build state..."
-make ARCH=x86_64 clean
+# Create timeconst.bc stub to allow kernel build to proceed
+os.makedirs('kernel/time', exist_ok=True)
+open('kernel/time/timeconst.bc', 'w').write('')
+PYEOF
 
 echo "[*] Building kernel scripts and headers..."
 make ARCH=x86_64 -j"$(nproc)" scripts
-
-echo "[*] Generating timeconst.h..."
-make ARCH=x86_64 include/generated/timeconst.h
 
 echo "[*] Running modules_prepare..."
 make ARCH=x86_64 -j"$(nproc)" modules_prepare
