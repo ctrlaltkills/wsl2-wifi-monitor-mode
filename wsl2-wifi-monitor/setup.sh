@@ -64,9 +64,11 @@ open('include/generated/autoconf.h', 'w').write('\n'.join(autoconf) + '\n')
 open('include/config/auto.conf', 'w').write('\n'.join(auto_conf) + '\n')
 open('include/config/auto.conf.cmd', 'w').write('include/config/auto.conf: \\\n')
 
-# Create timeconst.bc stub to allow kernel build to proceed
+# Create stub files for shallow clone compatibility
 os.makedirs('kernel/time', exist_ok=True)
+os.makedirs('kernel', exist_ok=True)
 open('kernel/time/timeconst.bc', 'w').write('')
+open('kernel/bounds.s', 'w').write('')
 PYEOF
 
 echo "[*] Building kernel scripts and headers..."
