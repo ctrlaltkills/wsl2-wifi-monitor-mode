@@ -68,6 +68,16 @@ echo "[*] Building kernel scripts..."
 make ARCH=x86_64 SHELL=/bin/bash -j"$(nproc)" scripts
 
 echo "[*] Running modules_prepare..."
+# Pre-generate compile.h to avoid shell quoting issues with GCC version
+GCC_VERSION=$(gcc --version | head -1)
+cat > include/generated/compile.h << EOF
+#define UTS_MACHINE "x86_64"
+#define UTS_VERSION "#1 SMP ${GCC_VERSION}"
+#define LINUX_COMPILE_BY "root"
+#define LINUX_COMPILE_HOST "wsl2"
+#define LINUX_COMPILER "$(gcc --version | head -1)"
+EOF
+
 make ARCH=x86_64 SHELL=/bin/bash -j"$(nproc)" modules_prepare
 
 ln -sf "${KERNEL_SRC}" /lib/modules/"${KERNEL}"/build
