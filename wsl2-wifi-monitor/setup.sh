@@ -32,6 +32,9 @@ fi
 
 cd "${KERNEL_SRC}"
 
+# Ensure bash is used for kernel build
+export SHELL=/bin/bash
+
 cp /proc/config.gz .
 gunzip -f config.gz
 cp config .config
