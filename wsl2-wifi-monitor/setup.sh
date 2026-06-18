@@ -25,7 +25,7 @@ fi
 
 if [ ! -d "${KERNEL_SRC}" ]; then
     echo "[*] Cloning WSL2 kernel source..."
-    git clone --depth=1 --branch "${KERNEL_TAG}" \
+    git clone --branch "${KERNEL_TAG}" \
         https://github.com/microsoft/WSL2-Linux-Kernel.git \
         "${KERNEL_SRC}"
 fi
@@ -40,7 +40,6 @@ mkdir -p include/config include/generated
 
 python3 - << 'PYEOF'
 import re
-import os
 
 lines = open('.config').read().splitlines()
 autoconf = ['/* Automatically generated. */', '#ifndef __GENERATED_AUTOCONF_H', '#define __GENERATED_AUTOCONF_H', '']
@@ -63,15 +62,9 @@ autoconf += ['', '#endif']
 open('include/generated/autoconf.h', 'w').write('\n'.join(autoconf) + '\n')
 open('include/config/auto.conf', 'w').write('\n'.join(auto_conf) + '\n')
 open('include/config/auto.conf.cmd', 'w').write('include/config/auto.conf: \\\n')
-
-# Create stub files for shallow clone compatibility
-os.makedirs('kernel/time', exist_ok=True)
-os.makedirs('kernel', exist_ok=True)
-open('kernel/time/timeconst.bc', 'w').write('')
-open('kernel/bounds.s', 'w').write('')
 PYEOF
 
-echo "[*] Building kernel scripts and headers..."
+echo "[*] Building kernel scripts..."
 make ARCH=x86_64 -j"$(nproc)" scripts
 
 echo "[*] Running modules_prepare..."
