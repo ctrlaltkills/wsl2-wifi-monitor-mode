@@ -32,9 +32,6 @@ fi
 
 cd "${KERNEL_SRC}"
 
-# Ensure bash is used for kernel build
-export SHELL=/bin/bash
-
 cp /proc/config.gz .
 gunzip -f config.gz
 cp config .config
@@ -68,10 +65,10 @@ open('include/config/auto.conf.cmd', 'w').write('include/config/auto.conf: \\\n'
 PYEOF
 
 echo "[*] Building kernel scripts..."
-make ARCH=x86_64 -j"$(nproc)" scripts
+make ARCH=x86_64 SHELL=/bin/bash -j"$(nproc)" scripts
 
 echo "[*] Running modules_prepare..."
-make ARCH=x86_64 -j"$(nproc)" modules_prepare
+make ARCH=x86_64 SHELL=/bin/bash -j"$(nproc)" modules_prepare
 
 ln -sf "${KERNEL_SRC}" /lib/modules/"${KERNEL}"/build
 
